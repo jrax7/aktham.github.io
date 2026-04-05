@@ -190,19 +190,14 @@ body:has(a:hover) #cur-ring{width:44px;height:44px;border-color:rgba(59,130,246,
   position:fixed;bottom:0;left:0;right:0;z-index:20;
   display:flex;align-items:center;justify-content:space-between;
   padding:.75rem 2.5rem;
-  border-top:1px solid var(--border);
   background:rgba(4,6,12,.75);
   backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   opacity:0;animation:fadeUp .5s .9s ease forwards;
 }
-.site-footer-bar::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent 0%,var(--acc) 30%,var(--acc2) 60%,transparent 100%);
-  opacity:.35;
-}
+
 .footer-copy{font-family:var(--mono);font-size:.56rem;color:var(--text3);letter-spacing:.06em;}
 .footer-domain{font-family:var(--mono);font-size:.56rem;color:var(--text3);letter-spacing:.04em;}
-.footer-domain span{color:var(--acc);opacity:.6;}
+.footer-domain span{color:var(--text3);}
 
 
 @media(max-width:600px){
@@ -272,7 +267,7 @@ body:has(a:hover) #cur-ring{width:44px;height:44px;border-color:rgba(59,130,246,
   <!-- socials pinned bottom -->
   <div class="socials-wrap">
   <div class="socials">
-    <a class="soc" href="mailto:aktham.alarabi@gmail.com" title="Email">
+    <a class="soc" href="/cdn-cgi/l/email-protection#f899938c909995d69994998a999a91b89f95999194d69b9795" title="Email">
       <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
     </a>
     <div class="sdiv"></div>
@@ -292,7 +287,7 @@ body:has(a:hover) #cur-ring{width:44px;height:44px;border-color:rgba(59,130,246,
   <span class="footer-domain">aktham<span>.net</span></span>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ══ BOOT ══ */
 (function(){
   const boot = document.getElementById('boot');
@@ -456,10 +451,39 @@ document.querySelectorAll('.lc').forEach(card => {
 });
 
 /* ══ AUDIO ══ */
+// Create and immediately resume AudioContext on page load to bypass autoplay policy
 let actx = null;
+function initAudio(){
+  if(actx) return;
+  actx = new (window.AudioContext||window.webkitAudioContext)();
+  // Resume immediately - needed for some browsers
+  if(actx.state === 'suspended') actx.resume();
+}
+// Try to init audio as early as possible via a silent buffer trick
+window.addEventListener('load', () => {
+  try {
+    actx = new (window.AudioContext||window.webkitAudioContext)();
+    // Play a silent buffer to unlock the context
+    const buf = actx.createBuffer(1, 1, 22050);
+    const src = actx.createBufferSource();
+    src.buffer = buf;
+    src.connect(actx.destination);
+    src.start(0);
+    // Resume in case it's still suspended
+    actx.resume();
+  } catch(e) {}
+});
+// Also unlock on first user interaction as fallback
+['click','touchstart','keydown','mousemove'].forEach(ev => {
+  document.addEventListener(ev, () => {
+    if(actx && actx.state === 'suspended') actx.resume();
+  }, {once: true});
+});
+
 function tick(f=900, d=.05){
   try{
-    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    if(!actx) initAudio();
+    if(actx.state === 'suspended') actx.resume();
     const o=actx.createOscillator(), g=actx.createGain();
     o.connect(g); g.connect(actx.destination);
     o.frequency.value=f; o.type='sine';
@@ -469,8 +493,8 @@ function tick(f=900, d=.05){
   }catch(e){}
 }
 document.querySelectorAll('.lc,.soc').forEach(el => {
-  el.addEventListener('mouseenter', () => tick(880,.06));
-  el.addEventListener('click', () => tick(1200,.04));
+  el.addEventListener('mouseenter', () => tick(el.classList.contains('feat') ? 1100 : 900));
+  el.addEventListener('click', () => tick(1300, .08));
 });
 </script>
 </body>
