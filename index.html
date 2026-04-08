@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#04060c" media="(prefers-color-scheme: dark)"/>
+<meta name="theme-color" content="#f0f4ff" media="(prefers-color-scheme: light)"/>
 <title>Aktham Al-Arabi — Network &amp; Cloud Security Engineer</title>
 <meta name="description" content="Aktham Al-Arabi — Network &amp; Cloud Security Engineer based in Amman, Jordan. Portfolio, GitHub, LinkedIn and more."/>
 <meta property="og:title" content="Aktham Al-Arabi — Network &amp; Cloud Security Engineer"/>
@@ -38,7 +40,14 @@
   --border:rgba(0,0,0,0.08);
   --border2:rgba(37,99,235,0.28);
 }
-html,body{height:100%;overflow:hidden;}
+html,body{height:100%;}
+/* Allow scroll on very small screens so nothing gets clipped */
+@media(max-height:580px),(max-width:360px){
+  html,body{overflow-y:auto;}
+}
+@media(min-height:581px) and (min-width:361px){
+  html,body{overflow:hidden;}
+}
 body{background:var(--bg);color:var(--text);font-family:var(--display);cursor:none;transition:background .35s,color .35s;}
 
 /* ─── REDUCED MOTION ─── */
@@ -52,13 +61,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--display);cursor:no
 /* ─── CUSTOM CURSOR (mouse only) ─── */
 @media(pointer:fine){
   #cur{position:fixed;width:6px;height:6px;background:var(--acc2);border-radius:50%;
-    pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
-    mix-blend-mode:screen;transition:width .15s,height .15s,background .35s;}
-  #cur-ring{position:fixed;width:28px;height:28px;border:1px solid rgba(59,130,246,.35);
-    border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
+    pointer-events:none;z-index:2147483647;transform:translate(-50%,-50%);
+    transition:width .15s,height .15s,background .35s;}
+  #cur-ring{position:fixed;width:28px;height:28px;border:1px solid rgba(59,130,246,.45);
+    border-radius:50%;pointer-events:none;z-index:2147483646;transform:translate(-50%,-50%);
     transition:width .2s,height .2s,border-color .2s;}
   body:has(a:hover,button:hover) #cur{width:12px;height:12px;}
-  body:has(a:hover,button:hover) #cur-ring{width:44px;height:44px;border-color:rgba(59,130,246,.6);}
+  body:has(a:hover,button:hover) #cur-ring{width:44px;height:44px;border-color:rgba(59,130,246,.7);}
+  /* Dark theme: screen blend looks great on dark bg */
+  [data-theme="dark"] #cur{mix-blend-mode:screen;}
+  /* Light theme: use a high-contrast color + normal blend so cursor stays visible */
+  [data-theme="light"] #cur{background:#1d4ed8;mix-blend-mode:normal;box-shadow:0 0 0 1.5px rgba(255,255,255,.6);}
+  [data-theme="light"] #cur-ring{border-color:rgba(29,78,216,.5);}
+  [data-theme="light"] body:has(a:hover,button:hover) #cur-ring{border-color:rgba(29,78,216,.8);}
 }
 @media(pointer:coarse){
   body{cursor:auto;}
@@ -118,6 +133,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--display);cursor:no
 /* --- SCENE --- */
 #scene{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;
   align-items:center;padding:0;}
+@media(max-width:600px){
+  #scene{position:relative;inset:auto;width:100%;min-height:100svh;min-height:100vh;}
+}
+
+/* Tablet: tighten spacing a touch */
+@media(max-width:768px) and (min-width:601px){
+  .n-first{font-size:clamp(3rem,8vw,5rem);}
+  .n-last{font-size:clamp(3.8rem,10vw,7rem);}
+  .tagline{font-size:.68rem;}
+  #theme-btn{top:1.1rem;right:3.5rem;}
+}
 
 /* badge pinned top */
 .badge-wrap{position:absolute;top:3rem;left:0;right:0;display:flex;justify-content:center;
@@ -128,7 +154,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--display);cursor:no
   justify-content:center;padding:0 2rem;}
 
 /* socials pinned bottom */
-.socials-wrap{position:absolute;bottom:4rem;left:0;right:0;display:flex;justify-content:center;
+.socials-wrap{position:absolute;bottom:5rem;left:0;right:0;display:flex;justify-content:center;
   opacity:0;animation:fadeUp .5s .7s ease forwards;}
 
 /* --- BADGE --- */
@@ -270,6 +296,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--display);cursor:no
   position:fixed;bottom:0;left:0;right:0;z-index:20;
   display:flex;align-items:center;justify-content:space-between;
   padding:.75rem 2.5rem;
+  padding-bottom:calc(.75rem + env(safe-area-inset-bottom, 0px));
   background:rgba(4,6,12,.75);
   backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   opacity:0;animation:fadeUp .5s .9s ease forwards;
@@ -280,12 +307,39 @@ body{background:var(--bg);color:var(--text);font-family:var(--display);cursor:no
 .footer-domain{font-family:var(--mono);font-size:.56rem;color:var(--text2);letter-spacing:.04em;}
 
 @media(max-width:600px){
-  .links{flex-direction:column;align-items:stretch;width:100%;max-width:290px;}
+  /* Allow scene to scroll if content is taller than viewport */
+  #scene{position:relative;min-height:100svh;min-height:100vh;overflow-y:auto;padding-bottom:4rem;}
+  /* Badge: relative flow, not absolute, so it doesn't overlap name */
+  .badge-wrap{position:relative;top:auto;left:auto;right:auto;padding-top:1.5rem;padding-bottom:0;margin-bottom:.5rem;opacity:1;animation:none;}
+  /* Center block: natural flow */
+  .center-block{flex:none;padding:1rem 1.25rem 1rem;justify-content:flex-start;}
+  /* Socials: relative flow */
+  .socials-wrap{position:relative;bottom:auto;left:auto;right:auto;padding:1rem 1.25rem .5rem;opacity:1;animation:none;}
+  /* Links full width */
+  .links{flex-direction:column;align-items:stretch;width:100%;max-width:100%;opacity:1;animation:none;}
   .lc{justify-content:space-between;}
+  /* Name sizing */
+  .n-first{font-size:clamp(2.4rem,10vw,3.8rem);}
+  .n-last{font-size:clamp(3rem,13vw,5rem);}
+  /* Footer: ensure it doesn't clip content — reduce padding */
+  .site-footer-bar{padding:.6rem 1rem;}
+  .footer-copy{font-size:.48rem;}
+  .footer-domain{font-size:.48rem;}
+  /* Tagline wrap */
+  .tagline{font-size:.62rem;white-space:normal;text-align:center;padding:0 .5rem;margin-bottom:1.4rem;}
+  /* Name wrap spacing */
+  .name-wrap{margin-bottom:1.2rem;opacity:1;animation:none;}
+  /* Hide decorative elements that cause overflow */
   .corner,.scan{display:none;}
-  .n-first{font-size:clamp(2.4rem,9vw,3.8rem);}
-  .n-last{font-size:clamp(3rem,12vw,5rem);}
   #kbd-hint{display:none;}
+  /* Theme button: don't overlap badge area */
+  #theme-btn{top:1rem;right:1rem;}
+}
+/* Extra small screens */
+@media(max-width:360px){
+  .n-first{font-size:2rem;}
+  .n-last{font-size:2.6rem;}
+  .badge{font-size:.52rem;padding:.25rem .75rem;}
 }
 </style>
 </head>
@@ -474,7 +528,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     const d = document.createElement('div');
     d.className = 'trail-dot';
     d.setAttribute('aria-hidden', 'true');
-    d.style.cssText = 'position:fixed;border-radius:50%;pointer-events:none;z-index:9996;transform:translate(-50%,-50%);background:rgba(59,130,246,.2);';
+    d.style.cssText = 'position:fixed;border-radius:50%;pointer-events:none;z-index:2147483644;transform:translate(-50%,-50%);background:rgba(59,130,246,.2);';
     document.body.appendChild(d);
     return {el: d, x: -300, y: -300};
   });
